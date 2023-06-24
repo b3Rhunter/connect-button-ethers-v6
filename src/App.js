@@ -12,18 +12,17 @@ function App() {
   const connect = async () => {
     setLoading(true);
     try {
-      let signer = null;
       let provider;
       if (window.ethereum == null) {
         console.log("MetaMask not installed");
-        const provider = ethers.getDefaultProvider();
+        provider = ethers.getDefaultProvider();
         console.log(provider)
       } else {
-        const provider = new ethers.BrowserProvider(window.ethereum)
-
+        provider = new ethers.BrowserProvider(window.ethereum)
+  
         const network = await provider.getNetwork();
-        const desiredChainId = '0x89';
-        if (network.chainId !== parseInt(desiredChainId)) {
+        const desiredChainId = '0x14A33';
+        if (network.chainId !== parseInt(desiredChainId, 16)) {
           try {
             await window.ethereum.request({
               method: 'wallet_switchEthereumChain',
@@ -36,14 +35,14 @@ function App() {
                   method: 'wallet_addEthereumChain',
                   params: [{
                     chainId: desiredChainId,
-                    chainName: 'Polygon',
+                    chainName: 'Base Goerli',
                     nativeCurrency: {
-                      name: 'MATIC',
-                      symbol: 'MATIC',
+                      name: 'ETH',
+                      symbol: 'ETH',
                       decimals: 18
                     },
-                    rpcUrls: ['https://polygon-rpc.com/'],
-                    blockExplorerUrls: ['https://polygonscan.com/'],
+                    rpcUrls: ['https://goerli.base.org'],
+                    blockExplorerUrls: ['https://goerli.basescan.org'],
                   }],
                 });
               } catch (addError) {
@@ -54,6 +53,8 @@ function App() {
             }
           }
         }
+        provider = new ethers.BrowserProvider(window.ethereum);
+
         const signer = await provider.getSigner();
         const message = "hello world!";
         const sig = await signer.signMessage(message);
@@ -64,7 +65,7 @@ function App() {
         const verify = ethers.verifyMessage(message, sig);
         console.log(verify);
         setConnected(true);
-
+  
         const { ethereum } = window;
         if (ethereum) {
           const ensProvider = new ethers.InfuraProvider('mainnet');
@@ -88,6 +89,7 @@ function App() {
       setConnected(false);
       setLoading(false);
       showNotification(error.message);
+      console.log(error)
     }
   }
 
